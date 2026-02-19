@@ -83,7 +83,7 @@ const STEP_ICONS: Record<string, React.ReactNode> = {
   '04': (<svg viewBox="0 0 28 28" fill="none" width="22" height="22"><rect x="3" y="4" width="22" height="16" rx="3" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.3"/><polyline points="7,16 11,10 15,13 21,7" stroke="rgba(255,255,255,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/><circle cx="21" cy="7" r="1.5" fill="rgba(255,255,255,0.85)"/><line x1="3" y1="23" x2="25" y2="23" stroke="rgba(255,255,255,0.4)" strokeWidth="1.2" strokeLinecap="round"/></svg>),
 };
 
-// Canvas BG
+// Particle Network — original background
 const DataCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -96,18 +96,24 @@ const DataCanvas: React.FC = () => {
     canvas.addEventListener('mousemove', (e) => { const r = canvas.getBoundingClientRect(); mouse.x = e.clientX-r.left; mouse.y = e.clientY-r.top; });
     canvas.addEventListener('mouseleave', () => { mouse.x=-9999; mouse.y=-9999; });
     type Node = { x:number;y:number;vx:number;vy:number;r:number;pulse:number;ps:number };
-    const nodes: Node[] = Array.from({length:40},()=>({ x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.5+1,pulse:Math.random()*Math.PI*2,ps:.02+Math.random()*.025 }));
-    type Sig={fi:number;ti:number;t:number;sp:number};
+    const nodes: Node[] = Array.from({length:44},()=>({ x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.6+1.1,pulse:Math.random()*Math.PI*2,ps:.02+Math.random()*.025 }));
+    type Sig = {fi:number;ti:number;t:number;sp:number};
     const sigs:Sig[]=[];
-    const spawnSig=()=>{const f=Math.floor(Math.random()*nodes.length);let b=-1,bd=9999;for(let i=0;i<nodes.length;i++){if(i===f)continue;const dx=nodes[f].x-nodes[i].x,dy=nodes[f].y-nodes[i].y,d=Math.sqrt(dx*dx+dy*dy);if(d<150&&d<bd){bd=d;b=i;}}if(b!==-1)sigs.push({fi:f,ti:b,t:0,sp:.012+Math.random()*.015});};
-    const si=setInterval(spawnSig,300);
-    const MD=145,MSD=130;
+    const spawnSig=()=>{ const f=Math.floor(Math.random()*nodes.length); let b=-1,bd=9999; for(let i=0;i<nodes.length;i++){if(i===f)continue;const dx=nodes[f].x-nodes[i].x,dy=nodes[f].y-nodes[i].y,d=Math.sqrt(dx*dx+dy*dy);if(d<155&&d<bd){bd=d;b=i;}} if(b!==-1)sigs.push({fi:f,ti:b,t:0,sp:.011+Math.random()*.015}); };
+    const si=setInterval(spawnSig,280);
+    const MD=150,MSD=140;
     const draw=()=>{
-      time+=.01;ctx.clearRect(0,0,canvas.width,canvas.height);
+      time+=.01; ctx.clearRect(0,0,canvas.width,canvas.height);
       nodes.forEach(n=>{n.x+=n.vx;n.y+=n.vy;n.pulse+=n.ps;if(n.x<0||n.x>canvas.width)n.vx*=-1;if(n.y<0||n.y>canvas.height)n.vy*=-1;});
-      for(let i=0;i<nodes.length;i++){for(let j=i+1;j<nodes.length;j++){const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<MD){ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.strokeStyle=`rgba(37,99,235,${(1-d/MD)*.11})`;ctx.lineWidth=.7;ctx.stroke();}}const mx=nodes[i].x-mouse.x,my=nodes[i].y-mouse.y,md=Math.sqrt(mx*mx+my*my);if(md<MSD){const a=(1-md/MSD);const g=ctx.createLinearGradient(nodes[i].x,nodes[i].y,mouse.x,mouse.y);g.addColorStop(0,`rgba(99,160,255,${a*.38})`);g.addColorStop(1,`rgba(37,99,235,${a*.58})`);ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(mouse.x,mouse.y);ctx.strokeStyle=g;ctx.lineWidth=1.2;ctx.stroke();}}
-      for(let s=sigs.length-1;s>=0;s--){const sg=sigs[s];sg.t+=sg.sp;if(sg.t>=1){sigs.splice(s,1);continue;}const nx=nodes[sg.fi].x+(nodes[sg.ti].x-nodes[sg.fi].x)*sg.t,ny=nodes[sg.fi].y+(nodes[sg.ti].y-nodes[sg.fi].y)*sg.t;const al=sg.t<.5?sg.t*2:(1-sg.t)*2;const t2=Math.max(0,sg.t-.12);const tx=nodes[sg.fi].x+(nodes[sg.ti].x-nodes[sg.fi].x)*t2,ty=nodes[sg.fi].y+(nodes[sg.ti].y-nodes[sg.fi].y)*t2;const tg=ctx.createLinearGradient(tx,ty,nx,ny);tg.addColorStop(0,'rgba(99,160,255,0)');tg.addColorStop(1,`rgba(37,99,235,${al*.7})`);ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(nx,ny);ctx.strokeStyle=tg;ctx.lineWidth=1.8;ctx.stroke();ctx.beginPath();ctx.arc(nx,ny,2.5,0,Math.PI*2);ctx.fillStyle=`rgba(130,180,255,${al})`;ctx.fill();}
-      nodes.forEach(n=>{const mx=n.x-mouse.x,my=n.y-mouse.y,near=Math.sqrt(mx*mx+my*my)<MSD;const pr=n.r+Math.sin(n.pulse)*.35;ctx.beginPath();ctx.arc(n.x,n.y,near?pr*2:pr,0,Math.PI*2);ctx.fillStyle=near?'rgba(37,99,235,0.55)':'rgba(37,99,235,0.17)';ctx.fill();});
+      for(let i=0;i<nodes.length;i++){
+        for(let j=i+1;j<nodes.length;j++){const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<MD){ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.strokeStyle=`rgba(37,99,235,${(1-d/MD)*.12})`;ctx.lineWidth=.8;ctx.stroke();}}
+        const mx=nodes[i].x-mouse.x,my=nodes[i].y-mouse.y,md=Math.sqrt(mx*mx+my*my);
+        if(md<MSD){const a=(1-md/MSD);const g=ctx.createLinearGradient(nodes[i].x,nodes[i].y,mouse.x,mouse.y);g.addColorStop(0,`rgba(99,160,255,${a*.4})`);g.addColorStop(1,`rgba(37,99,235,${a*.6})`);ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(mouse.x,mouse.y);ctx.strokeStyle=g;ctx.lineWidth=1.3;ctx.stroke();}
+      }
+      for(let s=sigs.length-1;s>=0;s--){const sg=sigs[s];sg.t+=sg.sp;if(sg.t>=1){sigs.splice(s,1);continue;}const nx=nodes[sg.fi].x+(nodes[sg.ti].x-nodes[sg.fi].x)*sg.t,ny=nodes[sg.fi].y+(nodes[sg.ti].y-nodes[sg.fi].y)*sg.t;const al=sg.t<.5?sg.t*2:(1-sg.t)*2;const t2=Math.max(0,sg.t-.12);const tx=nodes[sg.fi].x+(nodes[sg.ti].x-nodes[sg.fi].x)*t2,ty=nodes[sg.fi].y+(nodes[sg.ti].y-nodes[sg.fi].y)*t2;const tg=ctx.createLinearGradient(tx,ty,nx,ny);tg.addColorStop(0,'rgba(99,160,255,0)');tg.addColorStop(1,`rgba(37,99,235,${al*.75})`);ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(nx,ny);ctx.strokeStyle=tg;ctx.lineWidth=1.8;ctx.stroke();ctx.beginPath();ctx.arc(nx,ny,3,0,Math.PI*2);ctx.fillStyle=`rgba(130,180,255,${al})`;ctx.fill();ctx.beginPath();ctx.arc(nx,ny,6,0,Math.PI*2);ctx.fillStyle=`rgba(37,99,235,${al*.2})`;ctx.fill();}
+      nodes.forEach(n=>{const mx=n.x-mouse.x,my=n.y-mouse.y,near=Math.sqrt(mx*mx+my*my)<MSD;const pr=n.r+Math.sin(n.pulse)*.4;if(near){const grd=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,12);grd.addColorStop(0,'rgba(37,99,235,0.28)');grd.addColorStop(1,'rgba(37,99,235,0)');ctx.beginPath();ctx.arc(n.x,n.y,12,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();}ctx.beginPath();ctx.arc(n.x,n.y,near?pr*2:pr,0,Math.PI*2);ctx.fillStyle=near?'rgba(37,99,235,0.55)':'rgba(37,99,235,0.18)';ctx.fill();});
+      const bx=canvas.width*.72+Math.sin(time*.35)*55,by=canvas.height*.28+Math.cos(time*.28)*38;
+      const bg=ctx.createRadialGradient(bx,by,0,bx,by,220);bg.addColorStop(0,'rgba(37,99,235,0.048)');bg.addColorStop(1,'rgba(37,99,235,0)');ctx.beginPath();ctx.arc(bx,by,220,0,Math.PI*2);ctx.fillStyle=bg;ctx.fill();
       animId=requestAnimationFrame(draw);
     };
     draw();
@@ -138,24 +144,27 @@ const Services: React.FC = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600;700;800;900&display=swap');
-
         .sv4-section { background:#e8edf8; padding:80px 0 100px; position:relative; overflow:hidden; }
+        .sv4-inner { position:relative; z-index:1; overflow:visible; }
+        .sv4-container-wrap { overflow:visible; }
         .sv4-inner { position:relative; z-index:1; }
         .sv4-container { max-width:1280px; margin:0 auto; padding:0 40px; }
 
         /* header */
         .sv4-header { text-align:center; margin-bottom:56px; }
-        .sv4-badge { display:inline-block; background:rgba(255,255,255,0.88); border:1px solid rgba(37,99,235,0.2); border-radius:20px; padding:5px 18px; font-family:'DM Sans',sans-serif; font-size:10px; font-weight:700; letter-spacing:.18em; color:#2563eb; text-transform:uppercase; margin-bottom:18px; }
-        .sv4-title { font-family:'DM Sans',sans-serif; font-size:clamp(34px,4vw,52px); font-weight:900; color:#0d141b; line-height:1.08; margin:0 0 14px; letter-spacing:-0.03em; }
+        .sv4-badge { display:inline-block; background:rgba(255,255,255,0.88); border:1px solid rgba(37,99,235,0.2); border-radius:20px; padding:5px 18px; font-family:inherit; font-size:10px; font-weight:700; letter-spacing:.18em; color:#2563eb; text-transform:uppercase; margin-bottom:18px; }
+        .sv4-title { font-family:inherit; font-size:clamp(34px,4vw,52px); font-weight:900; color:#0d141b; line-height:1.08; margin:0 0 14px; letter-spacing:-0.03em; }
         .sv4-title span { color:#2563eb; }
-        .sv4-subtitle { font-family:'DM Sans',sans-serif; font-size:16px; color:#5a7499; line-height:1.65; max-width:520px; margin:0 auto; }
+        .sv4-subtitle { font-family:inherit; font-size:18px; color:#5a7499; line-height:1.65; max-width:520px; margin:0 auto; }
 
         /* cards grid */
         .sv4-grid {
           display:grid;
           grid-template-columns: repeat(4, 1fr);
           gap:20px;
+          overflow:visible;
+          padding: 20px 8px;
+          margin: -20px -8px;
         }
 
         /* card */
@@ -169,19 +178,50 @@ const Services: React.FC = () => {
           box-shadow:0 4px 28px rgba(13,30,80,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
           position:relative;
           overflow:hidden;
-          transition:transform .3s, box-shadow .3s;
+          transition:transform .4s cubic-bezier(.22,.68,0,1.4), box-shadow .4s ease, border-color .3s;
           visibility:hidden;
           display:flex; flex-direction:column;
+          cursor:default;
         }
         .sv4-card:hover {
-          transform:translateY(-6px);
-          box-shadow:0 18px 48px rgba(37,99,235,0.14), inset 0 1px 0 rgba(255,255,255,0.9);
+          transform: translateY(-22px) scale(1.07);
+          box-shadow:
+            0 40px 80px rgba(37,99,235,0.22),
+            0 16px 32px rgba(37,99,235,0.14),
+            0 4px 8px rgba(13,30,80,0.08),
+            inset 0 1px 0 rgba(255,255,255,0.98);
+          border-color: rgba(37,99,235,0.3);
+          background:rgba(255,255,255,0.99);
+          z-index: 20;
         }
+        .sv4-card:hover .sv4-num {
+          color: rgba(37,99,235,0.18);
+          transform: scale(1.08);
+          transition: color .3s, transform .4s;
+        }
+        .sv4-card:hover .sv4-step-title {
+          color: #1a3a8f;
+        }
+        .sv4-card:hover .sv4-icon-pill {
+          transform: scale(1.12) translateY(-2px);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+          transition: transform .4s cubic-bezier(.22,.68,0,1.4), box-shadow .4s;
+        }
+        .sv4-card::before {
+          content:'';
+          position:absolute; inset:0;
+          border-radius:22px;
+          background: linear-gradient(135deg, rgba(37,99,235,0.06) 0%, transparent 60%);
+          opacity:0;
+          transition: opacity .3s;
+          pointer-events:none;
+        }
+        .sv4-card:hover::before { opacity:1; }
 
         /* big faded number */
         .sv4-num {
           position:absolute; top:14px; left:18px;
-          font-family:'DM Sans',sans-serif;
+          font-family:inherit;
           font-size:72px; font-weight:900;
           color:rgba(13,20,80,0.06);
           line-height:1; letter-spacing:-0.04em;
@@ -194,19 +234,20 @@ const Services: React.FC = () => {
           width:42px; height:42px; border-radius:12px;
           display:flex; align-items:center; justify-content:center;
           box-shadow:0 4px 12px rgba(0,0,0,0.15);
+          transition: transform .4s cubic-bezier(.22,.68,0,1.4), box-shadow .4s;
         }
 
         /* phase label */
         .sv4-phase {
-          font-family:'DM Serif Display',serif;
-          font-size:11px; font-style:italic;
+          font-family:Georgia,serif;
+          font-size:13px; font-style:italic;
           letter-spacing:.05em; color:#2563eb;
           margin:0 0 8px; margin-top:52px;
         }
 
         /* title */
         .sv4-step-title {
-          font-family:'DM Sans',sans-serif;
+          font-family:inherit;
           font-size:22px; font-weight:900;
           color:#0d141b; margin:0 0 10px;
           line-height:1.15; letter-spacing:-0.02em;
@@ -214,8 +255,8 @@ const Services: React.FC = () => {
 
         /* description */
         .sv4-step-desc {
-          font-family:'DM Sans',sans-serif;
-          font-size:13px; color:#5a7499;
+          font-family:inherit;
+          font-size:15px; color:#5a7499;
           line-height:1.7; margin:0 0 20px;
           flex:1;
         }
@@ -228,9 +269,9 @@ const Services: React.FC = () => {
         .sv4-tool {
           display:inline-flex; align-items:center; gap:5px;
           padding:4px 10px 4px 8px; border-radius:7px;
-          font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600;
-          border:1px solid #d8e4f0; color:#4c739a;
-          background:rgba(244,247,253,0.9);
+          font-family:inherit; font-size:11px; font-weight:600;
+          border:1px solid rgba(255,255,255,0.92); color:#8ab0cc;
+          background:rgba(255,255,255,0.06);
           transition:all .2s; cursor:default;
         }
         .sv4-tool:hover { border-color:#2563eb; color:#2563eb; background:#eff6ff; }
@@ -243,8 +284,8 @@ const Services: React.FC = () => {
           border-radius:10px; padding:8px 14px;
           margin-top:auto;
         }
-        .sv4-result-val { font-family:'DM Sans',sans-serif; font-size:20px; font-weight:900; color:#2563eb; letter-spacing:-0.03em; line-height:1; }
-        .sv4-result-lbl { font-family:'DM Sans',sans-serif; font-size:10px; color:#7a93b8; font-weight:500; }
+        .sv4-result-val { font-family:inherit; font-size:20px; font-weight:900; color:#2563eb; letter-spacing:-0.03em; line-height:1; }
+        .sv4-result-lbl { font-family:inherit; font-size:10px; color:#7a93b8; font-weight:500; }
 
         @media (max-width:1100px) { .sv4-grid { grid-template-columns:repeat(2,1fr); } }
         @media (max-width:640px)  { .sv4-grid { grid-template-columns:1fr; } .sv4-container { padding:0 20px; } }
