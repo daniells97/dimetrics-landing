@@ -5,6 +5,7 @@ const FORMSPREE_ID = (import.meta as unknown as { env: { VITE_FORMSPREE_ID?: str
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [submittedEmail, setSubmittedEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,6 +27,7 @@ const Contact: React.FC = () => {
         }),
       });
       if (res.ok) {
+        setSubmittedEmail(formData.email);
         setStatus('success');
         setFormData({ name: '', email: '', message: '' });
       } else {
@@ -88,21 +90,36 @@ const Contact: React.FC = () => {
                   disabled={status === 'sending'}
                 />
               </div>
+
               {status === 'success' && (
-                <p className="text-primary font-semibold text-sm">Gracias por tu mensaje. Te responderemos pronto a {CONTACT_EMAIL}.</p>
+                <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-4">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <p className="text-green-700 font-semibold text-sm">
+                    ¡Mensaje enviado! Te responderemos pronto a <strong>{submittedEmail}</strong>.
+                  </p>
+                </div>
               )}
+
               {status === 'error' && (
-                <p className="text-red-600 text-sm">No se pudo enviar. Configura VITE_FORMSPREE_ID en .env.local (ver README) o intenta de nuevo.</p>
+                <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
+                  <span className="text-red-400 text-xl">!</span>
+                  <p className="text-red-600 text-sm">
+                    No se pudo enviar el mensaje. Por favor intenta de nuevo o escríbenos directamente a{' '}
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="font-bold underline">{CONTACT_EMAIL}</a>.
+                  </p>
+                </div>
               )}
+
               <button
                 type="submit"
-                disabled={status === 'sending'}
+                disabled={status === 'sending' || status === 'success'}
                 className="bg-primary text-white py-4 rounded-xl font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {status === 'sending' ? 'Enviando…' : 'Enviar Mensaje'}
+                {status === 'sending' ? 'Enviando…' : status === 'success' ? '¡Mensaje enviado! ✓' : 'Enviar Mensaje'}
               </button>
             </form>
           </div>
+
           <div className="flex flex-col gap-10 lg:pl-10">
             <div className="flex flex-col gap-8">
               <h4 className="text-xl font-bold text-[#0d141b]">Información de Contacto</h4>
