@@ -1,71 +1,86 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const Header: React.FC = () => {
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const navLinks = [
-    { href: '#nosotros', label: 'Quiénes Somos' },
-    { href: '#servicios', label: 'Qué Hacemos' },
-    { href: '#contacto', label: 'Contáctenos' },
-  ];
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    e.preventDefault();
+    
+    // Si estamos en la página principal, hacer scroll
+    if (location.pathname === '/') {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Si estamos en otra página, navegar al home y luego al section
+      navigate('/', { state: { scrollTo: sectionId } });
+    }
+  };
+
+  // Efecto para scroll después de navegar
+  React.useEffect(() => {
+    if (location.state && (location.state as any).scrollTo) {
+      const sectionId = (location.state as any).scrollTo;
+      setTimeout(() => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [location]);
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-[#e7edf3]">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 py-3 sm:py-4 flex items-center justify-between gap-4">
-        <a href="#" className="flex items-center gap-3 shrink-0" aria-label="Dimetrics inicio">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-[#e7edf3]">
+      <div className="max-w-[1280px] mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-10 py-4">
+        <a href="/" className="flex items-center gap-3">
           <img
             src="/logo.png"
             alt="Dimetrics"
-            className="h-12 sm:h-14 w-auto object-contain"
-            width={160}
-            height={56}
-            loading="eager"
+            className="h-10 w-auto object-contain"
+            width={120}
+            height={40}
           />
-          <span className="text-[#0d141b] text-xl sm:text-2xl font-extrabold tracking-tight uppercase">
+          <span className="font-extrabold text-[#0d141b] tracking-tight uppercase text-lg hidden sm:inline">
             DIMETRICS
           </span>
         </a>
-        <nav className="hidden md:flex flex-1 justify-center items-center gap-8 lg:gap-10">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-[#0d141b] text-sm font-semibold hover:text-primary transition-colors"
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
-        <div className="hidden md:flex flex-1 flex justify-end w-full h-full">
-          <a
-            href="#contacto"
-            className="bg-primary hover:bg-primary/90 text-white px-10 py-2.5 rounded-lg text-sm font-bold transition-all shadow-md shadow-primary/20"
+        
+        <nav className="hidden md:flex items-center gap-8">
+          <a 
+            href="/#nosotros" 
+            onClick={(e) => handleNavClick(e, 'nosotros')}
+            className="text-sm font-medium text-[#0d141b] hover:text-primary transition-colors"
           >
-            Empezar ahora
+            Quiénes Somos
           </a>
-        </div>
-        <button
-          type="button"
-          className="md:hidden p-2 rounded-lg text-[#0d141b] hover:bg-[#e7edf3]"
-          aria-label="Menú"
-          aria-expanded={mobileOpen}
-          onClick={() => setMobileOpen(!mobileOpen)}
+          <a 
+            href="/#servicios" 
+            onClick={(e) => handleNavClick(e, 'servicios')}
+            className="text-sm font-medium text-[#0d141b] hover:text-primary transition-colors"
+          >
+            Qué Hacemos
+          </a>
+          <a 
+            href="/#contacto" 
+            onClick={(e) => handleNavClick(e, 'contacto')}
+            className="text-sm font-medium text-[#0d141b] hover:text-primary transition-colors"
+          >
+            Contáctenos
+          </a>
+        </nav>
+
+        <a
+          href="/#contacto"
+          onClick={(e) => handleNavClick(e, 'contacto')}
+          className="bg-primary hover:bg-primary/90 text-white text-sm font-bold px-5 py-2.5 rounded-lg transition-colors"
         >
-          <span className="material-symbols-outlined text-3xl">{mobileOpen ? 'close' : 'menu'}</span>
-        </button>
+          Empezar ahora
+        </a>
       </div>
-      {mobileOpen && (
-        <div className="md:hidden border-t border-[#e7edf3] bg-white px-4 py-4 flex flex-col gap-2">
-          {navLinks.map((link) => (
-            <a key={link.href} href={link.href} className="py-3 font-semibold" onClick={() => setMobileOpen(false)}>
-              {link.label}
-            </a>
-          ))}
-          <a href="#contacto" className="py-3 font-bold text-primary" onClick={() => setMobileOpen(false)}>
-            Empezar ahora
-          </a>
-        </div>
-      )}
     </header>
   );
 };

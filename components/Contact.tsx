@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const CONTACT_EMAIL = 'daniel.lopez@dimetrics.com.co';
+const CONTACT_EMAIL = 'info@dimetrics.com.co';
 const FORMSPREE_ID = (import.meta as unknown as { env: { VITE_FORMSPREE_ID?: string } }).env?.VITE_FORMSPREE_ID;
 
 const Contact: React.FC = () => {

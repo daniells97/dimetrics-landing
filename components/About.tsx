@@ -19,7 +19,7 @@ const About: React.FC = () => {
               Generamos confianza a través de la claridad
             </h3>
             <p className="text-[#4c739a] text-lg leading-relaxed">
-              En <strong>dimetrics.com.co</strong>, somos un equipo multidisciplinario de analistas, diseñadores y estrategas. Creemos que los datos solo tienen valor cuando se pueden comunicar de forma efectiva.
+              En <strong>dimetrics</strong>, somos un equipo multidisciplinario de analistas, diseñadores y estrategas. Creemos que los datos solo tienen valor cuando se pueden comunicar de forma efectiva.
             </p>
             <p className="text-[#4c739a] text-lg leading-relaxed">
               Nuestra misión es servir de puente entre la complejidad técnica y el crecimiento estratégico de su negocio, apoyando la toma de decisiones informada con un enfoque humano y narrativo.
