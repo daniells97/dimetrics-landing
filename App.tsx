@@ -8,6 +8,9 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import TermsConditions from './components/TermsConditions';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import ProductServices from './components/Productservices';
+import Pricing from './components/Pricing';
+import RefundPolicy from './components/Refundpolicy';
 
 // Componente para la página principal
 const HomePage: React.FC = () => {
@@ -29,8 +32,11 @@ const App: React.FC = () => {
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/servicios" element={<ProductServices />} />
+            <Route path="/precios" element={<Pricing />} />
             <Route path="/terminos" element={<TermsConditions />} />
             <Route path="/privacidad" element={<PrivacyPolicy />} />
+            <Route path="/reembolsos" element={<RefundPolicy />} />
           </Routes>
         </main>
         <Footer />
