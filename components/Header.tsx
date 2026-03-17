@@ -1,10 +1,10 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-
+ 
 const Header: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
+ 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
     
@@ -19,7 +19,7 @@ const Header: React.FC = () => {
       navigate('/', { state: { scrollTo: sectionId } });
     }
   };
-
+ 
   // Efecto para scroll después de navegar
   React.useEffect(() => {
     if (location.state && (location.state as any).scrollTo) {
@@ -32,7 +32,7 @@ const Header: React.FC = () => {
       }, 100);
     }
   }, [location]);
-
+ 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-[#e7edf3]">
       <div className="max-w-[1280px] mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-10 py-4">
@@ -65,6 +65,12 @@ const Header: React.FC = () => {
             Qué Hacemos
           </a>
           <a 
+            href="/precios" 
+            className="text-sm font-medium text-[#0d141b] hover:text-primary transition-colors"
+          >
+            Precios
+          </a>
+          <a 
             href="/#contacto" 
             onClick={(e) => handleNavClick(e, 'contacto')}
             className="text-sm font-medium text-[#0d141b] hover:text-primary transition-colors"
@@ -72,7 +78,7 @@ const Header: React.FC = () => {
             Contáctenos
           </a>
         </nav>
-
+ 
         <a
           href="/#contacto"
           onClick={(e) => handleNavClick(e, 'contacto')}
@@ -84,5 +90,5 @@ const Header: React.FC = () => {
     </header>
   );
 };
-
+ 
 export default Header;
